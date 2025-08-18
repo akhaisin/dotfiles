@@ -11,6 +11,7 @@ brew "unzip"
 brew "zoxide"
 brew "zsh"
 
+brew "ripgrep"
 brew "neovim"
 brew "python"
 
