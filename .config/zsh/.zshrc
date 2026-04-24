@@ -1,94 +1,86 @@
 #!/bin/zsh
 
-# echo ">> $ZDOTDIR/.zshrc"
+# ── Options ───────────────────────────────────────────────────────────────────
 
-
-# some useful options (man zshoptions)
-setopt autocd extendedglob nomatch menucomplete
-setopt interactive_comments
-stty stop undef		# Disable ctrl-s to freeze terminal.
+setopt autocd extendedglob nomatch menucomplete interactive_comments
+setopt HIST_IGNORE_ALL_DUPS HIST_FIND_NO_DUPS SHARE_HISTORY HIST_REDUCE_BLANKS
+stty stop undef
 zle_highlight=('paste:none')
-
-# beeping is annoying
 unsetopt BEEP
 
+# ── Homebrew (Linux) ──────────────────────────────────────────────────────────
 
-# Platform specific
-case "$(uname -s)" in
-    Linux)
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-        ;;
-    Darwin)
-        
-        ;;
-esac
+if [[ "$(uname -s)" == "Linux" ]] && [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
 
+# ── Completion ────────────────────────────────────────────────────────────────
 
 autoload -Uz compinit
-zstyle ':completion:*' menu select
-# zstyle ':completion::complete:lsof:*' menu yes select
 zmodload zsh/complist
-# compinit
-_comp_options+=(globdots)		# Include hidden files.
+_comp_options+=(globdots)
 
-autoload -U up-line-or-beginning-search
-autoload -U down-line-or-beginning-search
-zle -N up-line-or-beginning-search
-zle -N down-line-or-beginning-search
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*:git-checkout:*' sort false
 
-# Colors
 autoload -Uz colors && colors
 
-# Useful Functions
-source "$ZDOTDIR/functions.zsh"
+# ── Source config files ───────────────────────────────────────────────────────
 
-# Normal files to source
+source "$ZDOTDIR/functions.zsh"
 zsh_add_file "exports.zsh"
-zsh_add_file "vim-mode.zsh"
+zsh_add_file "vim_mode.zsh"
 zsh_add_file "aliases.zsh"
 zsh_add_file "prompt.zsh"
 
-# Plugins
-zsh_add_plugin "zsh-users/zsh-autosuggestions"
-zsh_add_plugin "zsh-users/zsh-syntax-highlighting"
+# ── Plugins ───────────────────────────────────────────────────────────────────
+
+# autopair — simple, no ordering requirements
 zsh_add_plugin "hlissner/zsh-autopair"
-# zsh_add_completion "esc/conda-zsh-completion" false
-# For more plugins: https://github.com/unixorn/awesome-zsh-plugins
-# More completions https://github.com/zsh-users/zsh-completions
 
-# Key-bindings
-bindkey -s '^o' 'ranger^M'
-bindkey -s '^f' 'zi^M'
-bindkey -s '^s' 'ncdu^M'
-# bindkey -s '^n' 'nvim $(fzf)^M'
-# bindkey -s '^v' 'nvim\n'
-bindkey -s '^z' 'zi^M'
-bindkey '^[[P' delete-char
-bindkey "^p" up-line-or-beginning-search # Up
-bindkey "^n" down-line-or-beginning-search # Down
-bindkey "^k" up-line-or-beginning-search # Up
-bindkey "^j" down-line-or-beginning-search # Down
-bindkey -r "^u"
-bindkey -r "^d"
-
-# FZF 
-# TODO update for mac
-[ -f /usr/share/fzf/completion.zsh ] && source /usr/share/fzf/completion.zsh
-[ -f /usr/share/fzf/key-bindings.zsh ] && source /usr/share/fzf/key-bindings.zsh
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-[ -f $ZDOTDIR/completion/_fnm ] && fpath+="$ZDOTDIR/completion/"
-# export FZF_DEFAULT_COMMAND='rg --hidden -l ""'
+# compinit must run before fzf-tab
 compinit
 
-# Edit line in vim with ctrl-e:
-autoload edit-command-line; zle -N edit-command-line
-# bindkey '^e' edit-command-line
+# fzf-tab replaces the default completion menu with FZF
+# must be after compinit, before autosuggestions/syntax-highlighting
+zsh_add_plugin "Aloxaf/fzf-tab"
 
+zsh_add_plugin "zsh-users/zsh-autosuggestions"
+zsh_add_plugin "zsh-users/zsh-history-substring-search"
 
-# Run Fastfetch
-if [[ -o interactive ]]; then
-fastfetch 
+# syntax-highlighting must be sourced last
+zsh_add_plugin "zsh-users/zsh-syntax-highlighting"
+
+# ── Key bindings ──────────────────────────────────────────────────────────────
+
+# History search with Up/Down arrows (via history-substring-search)
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+bindkey '^p' history-substring-search-up
+bindkey '^n' history-substring-search-down
+
+bindkey '^[[P' delete-char
+bindkey -r '^u'
+bindkey -r '^d'
+
+# Edit current command line in $EDITOR
+autoload edit-command-line
+zle -N edit-command-line
+bindkey '^e' edit-command-line
+
+# ── FZF ───────────────────────────────────────────────────────────────────────
+
+# fzf --zsh emits completion + key-binding setup (requires fzf >= 0.48)
+if command -v fzf &>/dev/null; then
+    eval "$(fzf --zsh)"
 fi
 
-# TODO: Fix backspace and other keys
-# tmux
+# ── Fastfetch ─────────────────────────────────────────────────────────────────
+
+if [[ -o interactive ]] && command -v fastfetch &>/dev/null; then
+    fastfetch
+fi
