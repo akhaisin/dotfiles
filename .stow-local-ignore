@@ -1,6 +1,6 @@
-Brewfile
-install.sh
-README.md
+^Brewfile$
+^install\.sh$
+^README\.md$
 
-.git
-.gitignore
+^\.git$
+^\.gitignore$
