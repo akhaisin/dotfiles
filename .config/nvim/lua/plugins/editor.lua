@@ -8,8 +8,6 @@ return {
         layout_config = { prompt_position = "top" },
         sorting_strategy = "ascending",
         winblend = 0,
-        -- Show file previews with bat-like syntax highlighting
-        file_previewer = require("telescope.previewers").vim_buffer_cat.new,
       },
     },
   },
@@ -34,6 +32,16 @@ return {
         },
       },
     },
+  },
+
+  -- Mason: skip tools managed by Homebrew
+  {
+    "williamboman/mason.nvim",
+    opts = function(_, opts)
+      opts.ensure_installed = vim.tbl_filter(function(tool)
+        return not vim.tbl_contains({ "ruff" }, tool)
+      end, opts.ensure_installed or {})
+    end,
   },
 
   -- Treesitter: languages to install upfront

@@ -21,6 +21,7 @@ brew "fastfetch"
 brew "neovim"
 brew "lazygit"
 brew "python"
+brew "ruff"
 
 # Terminal multiplexer
 brew "tmux"
