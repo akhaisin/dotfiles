@@ -2,6 +2,7 @@
 
 # ── History ───────────────────────────────────────────────────────────────────
 
+mkdir -p "$XDG_DATA_HOME/zsh"
 HISTFILE="$XDG_DATA_HOME/zsh/.zhistory"
 HISTSIZE=1000000
 SAVEHIST=1000000

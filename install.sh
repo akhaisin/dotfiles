@@ -117,6 +117,9 @@ fi
 
 stow --dir="$DOTFILES_DIR" --target="$HOME" .
 
+# Create XDG data directories that config files depend on at runtime.
+mkdir -p "$HOME/.local/share/zsh"
+
 echo ""
 if [ "$FRESH" = true ]; then
     echo "Dotfiles installed. Open a new terminal to apply ZSH config."
